@@ -1,75 +1,39 @@
-# React + TypeScript + Vite
+# Catatan Lokal + REST API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplikasi React + TypeScript untuk catatan lokal dan pengelolaan post dengan Express + Neon.
 
-Currently, two official plugins are available:
+## Persiapan
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install dependency: `npm install`.
+2. Salin `.env.example` menjadi `.env`, lalu isi `DATABASE_URL` dari Neon.
+3. Jalankan SQL di `server/schema.sql` pada Neon SQL Editor untuk membuat tabel `posts`.
+4. Jalankan dua terminal dari root proyek:
 
-## React Compiler
+   ```sh
+   npm run dev:server
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+   ```sh
+   npm run dev
+   ```
 
-## Expanding the ESLint configuration
+Frontend tersedia di URL Vite (biasanya `http://localhost:5173`); API berjalan di `http://localhost:3000`.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Endpoint
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- `GET /api/posts` menampilkan post. Parameter opsional `?search=...` mencari judul maupun isi dengan SQL `ILIKE`.
+- `POST /api/posts` menerima JSON `{ "title": "...", "body": "..." }`.
+- `DELETE /api/posts/:id` menghapus post berdasarkan ID.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Express mengaktifkan `cors()` untuk origin frontend dan `express.json()` untuk membaca body JSON. Origin dapat diatur lewat `CLIENT_ORIGIN`. URL API frontend dapat diatur lewat `VITE_API_URL` di `.env`.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Struktur fitur
 
-```
+- `src/App.tsx`: navigasi tab Catatan dan Post.
+- `src/types/post.ts`: tipe data post.
+- `src/components/PostForm.tsx`: form controlled untuk menambah post.
+- `src/pages/PostsPage.tsx`: GET, POST, DELETE, loading/error, dan pencarian dengan `useEffect` saat `search` berubah.
+- `server/index.js`: Express API dan query Neon.
+- `server/schema.sql`: skema tabel post.
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+Jalankan `npm run build` dan `npm run lint` untuk validasi frontend.
